@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import glob
 
-
+from functools import reduce
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -72,8 +72,13 @@ for i in conditions_list:
 df_list = []
 
 
-            
-data = pd.DataFrame(nlist)
+frames = []       
+data = pd.DataFrame.from_dict(nlist)
+for i in range(1, len(data.columns)):
+    frames.append(data[['cas','predicted-logDs 25 °C pH {}'.format(i)]].dropna())
 
+start = frames[0]
+df_merged = reduce(lambda  left,right: pd.merge(left,right,on=['cas'],
+                                            how='outer'), frames)
     
-print(data)
+print(df_merged.head())    
