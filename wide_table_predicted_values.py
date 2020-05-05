@@ -2,7 +2,7 @@ import xml.etree.ElementTree as et
 import pandas as pd
 import os
 import glob
-
+import numpy as np
 from functools import reduce
 
 pd.set_option('display.max_columns', None)
@@ -46,7 +46,9 @@ for i in result:
                             acid_list.append((i, 'pH ' + acid))                        
 
     except(TypeError):
-        print(None)
+        val_list.append((i, 'nan'))
+        temp_list.append((i, '{} '.format(prop) + temp + ' '))
+        acid_list.append((i, 'pH ' + acid))
 
 conditions_list = []
 
@@ -61,24 +63,31 @@ for i in total:
 conditions_list = set(conditions_list)    
 
 
-print(total)
+#print(total)
+
 nlist = []
+count = 0
 for i in conditions_list:
     for j in total:
         for k in cas_list: 
             if i == j[-1] and k == j[0]:
                 nlist.append({i:j[1],'cas': j[0]})
-            
+
+
 df_list = []
 
 
 frames = []       
 data = pd.DataFrame.from_dict(nlist)
+
+
 for i in range(1, len(data.columns)):
-    frames.append(data[['cas','predicted-logDs 25 °C pH {}'.format(i)]].dropna())
+    frames.append(data[['cas','{} 25 °C pH {}'.format(prop, i)]].dropna())
 
 start = frames[0]
 df_merged = reduce(lambda  left,right: pd.merge(left,right,on=['cas'],
                                             how='outer'), frames)
     
 print(df_merged.head())    
+#df_merged.to_csv("{}.csv".format(prop))
+print(len(df_merged))  
